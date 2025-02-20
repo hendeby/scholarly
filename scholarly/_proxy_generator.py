@@ -485,6 +485,9 @@ class ProxyGenerator(object):
                 # ScraperAPI requests to work.
                 # https://www.scraperapi.com/documentation/
                 init_kwargs["verify"] = False
+        if "proxies" in init_kwargs:
+            init_kwargs["mounts"] = {p: httpx.HTTPTransport(proxy=url) for (p,url) in init_kwargs["proxies"].items()}
+            del init_kwargs["proxies"]
         self._session = httpx.Client(**init_kwargs)
         self._webdriver = None
 
