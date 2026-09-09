@@ -26,7 +26,7 @@ setuptools.setup(
         'Topic :: Software Development :: Libraries :: Python Modules'],
     install_requires=['arrow',
                       'beautifulsoup4',
-                      'bibtexparser',
+                      'bibtexparser<2.0.0',
                       'deprecated',
                       'fake_useragent',
                       'free-proxy',
