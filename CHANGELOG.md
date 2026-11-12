@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Unreleased
+
+### Bugfixes
+- Pass the required `repeat` argument when refreshing the free proxy list.
+
 ## Changes in v1.7.0
 
 ### Features

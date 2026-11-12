@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import call, patch
 import os
 import sys
 from collections import Counter
@@ -92,6 +93,25 @@ class TestFreeProxy(unittest.TestCase):
         success = proxy_generator.FreeProxies()
         self.assertTrue(success)
         self.assertEqual(proxy_generator.proxy_mode, "FREE_PROXIES")
+
+    def test_freeproxy_refills_proxy_list(self):
+        proxy_generator = ProxyGenerator()
+        self.addCleanup(proxy_generator._close_session)
+        self.addCleanup(lambda: proxy_generator._fp_gen.close())
+        with patch("scholarly._proxy_generator.FreeProxy.get_proxy_list", autospec=True,
+                   side_effect=[["old:80", "new:80"], ["refreshed:80"]]) as get_proxy_list, \
+                patch.object(proxy_generator, "_check_proxy", return_value=True) as check_proxy, \
+                patch.object(proxy_generator, "_use_proxy", return_value=True):
+            self.assertTrue(proxy_generator.FreeProxies())
+            self.assertEqual(check_proxy.call_args_list,
+                             [call({"http://": "old:80", "https://": "old:80"})])
+            self.assertEqual(proxy_generator._proxy_gen("old:80"), "new:80")
+            freeproxy = get_proxy_list.call_args_list[0].args[0]
+            self.assertEqual(get_proxy_list.call_args_list,
+                             [call(freeproxy, repeat=False), call(freeproxy, repeat=False)])
+            self.assertEqual(check_proxy.call_args_list,
+                             [call({"http://": "old:80", "https://": "old:80"}),
+                              call({"http://": "new:80", "https://": "new:80"})])
 
 class TestScholarly(unittest.TestCase):
 
